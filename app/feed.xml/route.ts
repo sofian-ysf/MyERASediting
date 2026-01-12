@@ -67,7 +67,7 @@ export async function GET() {
       <description>${escapeXml(post.excerpt || post.title)}</description>
       <content:encoded><![CDATA[${post.content}]]></content:encoded>
       <dc:creator>${escapeXml(post.author || 'MyERAS Reviewer Team')}</dc:creator>
-      <pubDate>${post.publishedAt.toUTCString()}</pubDate>
+      <pubDate>${post.publishedAt?.toUTCString() || new Date().toUTCString()}</pubDate>
       <category>${escapeXml(post.category || 'ERAS Tips')}</category>
       ${post.tags?.split(',').map(tag => `<category>${escapeXml(tag.trim())}</category>`).join('') || ''}
       <media:content url="${baseUrl}/api/og?title=${encodeURIComponent(post.title)}" medium="image" />
@@ -132,7 +132,7 @@ async function generateAtomFeed() {
     <title>${escapeXml(post.title)}</title>
     <link href="${baseUrl}/blog/${post.slug}" />
     <id>${baseUrl}/blog/${post.slug}</id>
-    <updated>${post.publishedAt.toISOString()}</updated>
+    <updated>${post.publishedAt?.toISOString() || new Date().toISOString()}</updated>
     <summary>${escapeXml(post.excerpt || post.title)}</summary>
     <content type="html">${escapeXml(post.content || '')}</content>
     <author>

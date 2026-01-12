@@ -239,7 +239,7 @@ export async function blogSitemap(): Promise<MetadataRoute.Sitemap> {
           name: 'MyERAS Editing Blog',
           language: 'en',
         },
-        publicationDate: post.publishedAt.toISOString(),
+        publicationDate: post.publishedAt?.toISOString() || new Date().toISOString(),
         title: post.title,
         keywords: post.tags || '',
       },

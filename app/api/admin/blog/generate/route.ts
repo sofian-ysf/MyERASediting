@@ -201,7 +201,7 @@ Make the content informative, practical, and engaging. Include specific examples
         faqSection: faqSection.length > 0 ? faqSection : undefined,
         schemaMarkup,
         author: 'MyERAS Reviewer Team',
-        publishedAt: autoPublish ? new Date() : null,
+        publishedAt: autoPublish ? new Date() : undefined,
       },
     })
 

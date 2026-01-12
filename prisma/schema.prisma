@@ -173,7 +173,7 @@ model BlogPost {
   category      BlogCategory
   tags          String   // Comma-separated tags
   icon          String   // SVG icon name
-  publishedAt   DateTime @default(now())
+  publishedAt   DateTime?
   updatedAt     DateTime @updatedAt
   featured      Boolean  @default(false)
   readTime      Int      // in minutes
