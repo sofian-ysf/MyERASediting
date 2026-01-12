@@ -63,14 +63,6 @@ export const organizationSchema = {
         "@type": "Offer",
         "itemOffered": {
           "@type": "Service",
-          "name": "Essential Review Package",
-          "description": "Personal statement review with grammar check and formatting"
-        }
-      },
-      {
-        "@type": "Offer",
-        "itemOffered": {
-          "@type": "Service",
           "name": "Comprehensive Edit Package",
           "description": "Complete ERAS application review including CV and experiences"
         }
@@ -81,6 +73,14 @@ export const organizationSchema = {
           "@type": "Service",
           "name": "Premium Package",
           "description": "Full application optimization with strategy session"
+        }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "Complete Package",
+          "description": "Unlimited revisions and 1-on-1 video consultation"
         }
       }
     ]

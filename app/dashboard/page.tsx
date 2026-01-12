@@ -70,7 +70,6 @@ export default function Dashboard() {
         if (applications.length > 0) {
           const latestApp = applications[0];
           const packageMap: { [key: string]: string } = {
-            'ESSENTIAL': 'Essential Review',
             'COMPREHENSIVE': 'Comprehensive Edit',
             'PREMIUM': 'Premium Package',
             'COMPLETE': 'Complete Package'

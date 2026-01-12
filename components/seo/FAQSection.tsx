@@ -114,11 +114,11 @@ export const homepageFAQs: FAQ[] = [
   },
   {
     question: "How long does the ERAS review process take?",
-    answer: "Our turnaround times depend on the package you choose: Essential Review takes 72 hours, Comprehensive Edit takes 48 hours, and Premium/Complete packages are delivered within 24 hours. During peak season (August-September), we recommend booking early. Rush services are available for urgent deadlines."
+    answer: "Our turnaround times depend on the package you choose: Comprehensive Edit takes 48 hours, and Premium/Complete packages are delivered within 24 hours. During peak season (August-September), we recommend booking early. Rush services are available for urgent deadlines."
   },
   {
     question: "What's included in each ERAS review package?",
-    answer: "Essential Review ($149): Personal statement review, grammar/spelling check, and basic formatting. Comprehensive Edit ($299): Everything in Essential plus CV review, 3 experience descriptions, and program-specific tailoring. Premium Package ($499): Everything in Comprehensive plus all experience descriptions, LOR review, and strategy session. Complete Package ($799): Everything in Premium plus unlimited revisions for 30 days and 1-on-1 video consultation."
+    answer: "Comprehensive Edit ($299): Personal statement review, CV review, 3 experience descriptions, and program-specific tailoring. Premium Package ($499): Everything in Comprehensive plus all experience descriptions, LOR review, and strategy session. Complete Package ($799): Everything in Premium plus unlimited revisions for 30 days and 1-on-1 video consultation."
   },
   {
     question: "Can you help with specialty-specific ERAS applications?",
@@ -165,6 +165,6 @@ export const pricingFAQs: FAQ[] = [
   },
   {
     question: "Can I upgrade my package later?",
-    answer: "Absolutely! You can upgrade to a higher tier anytime by paying the difference. Many clients start with Essential Review and upgrade to Comprehensive or Premium after seeing the quality of our work."
+    answer: "Absolutely! You can upgrade to a higher tier anytime by paying the difference. Many clients start with Comprehensive Edit and upgrade to Premium or Complete after seeing the quality of our work."
   }
 ];

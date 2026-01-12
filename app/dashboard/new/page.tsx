@@ -532,33 +532,19 @@ function NewApplicationPage() {
 
   const packages = [
     {
-      id: "essential",
-      name: "Essential Review",
-      price: 149,
-      turnaround: "72 hours",
-      features: [
-        "Personal Statement Review",
-        "Grammar and spelling check",
-        "Basic formatting review",
-        "General feedback",
-        "One round of revisions"
-      ],
-      popular: false
-    },
-    {
       id: "comprehensive",
       name: "Comprehensive Edit",
       price: 299,
       turnaround: "48 hours",
       features: [
-        "Everything in Essential",
+        "Personal Statement Review",
         "CV/Resume review",
         "3 Experience descriptions",
         "Program-specific tailoring",
         "Two rounds of revisions",
         "Priority support"
       ],
-      popular: true
+      popular: false
     },
     {
       id: "premium",
@@ -574,7 +560,7 @@ function NewApplicationPage() {
         "Direct reviewer communication",
         "Application strategy session"
       ],
-      popular: false
+      popular: true
     },
     {
       id: "complete",
@@ -977,7 +963,7 @@ function NewApplicationPage() {
       </div>
 
       {/* Package Selection */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-4 sm:mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 mb-4 sm:mb-8 max-w-5xl mx-auto">
         {packages.map((pkg) => (
           <Card 
             key={pkg.id}

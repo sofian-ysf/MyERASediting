@@ -16,7 +16,8 @@ import {
   Shield,
   Clock,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  BookOpen
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -94,6 +95,7 @@ export default function AdminLayout({
     { name: "Dashboard", href: "/admin", icon: Home },
     { name: "Users", href: "/admin/users", icon: Users },
     { name: "Applications", href: "/admin/applications", icon: FileText },
+    { name: "Blog", href: "/admin/blog", icon: BookOpen },
   ];
 
   const isActiveRoute = (href: string) => {

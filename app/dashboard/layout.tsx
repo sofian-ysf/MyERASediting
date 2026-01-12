@@ -71,7 +71,6 @@ export default function DashboardLayout({
             if (applications.length > 0) {
               const latestApp = applications[0];
               const packageMap: { [key: string]: string } = {
-                'ESSENTIAL': 'Essential',
                 'COMPREHENSIVE': 'Comprehensive',
                 'PREMIUM': 'Premium',
                 'COMPLETE': 'Complete'

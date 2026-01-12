@@ -13,31 +13,18 @@ import { useState } from "react";
 
 const packages = [
   {
-    name: "Essential Review",
-    price: 149,
-    description: "72 hours turnaround",
-    features: [
-      "Personal Statement Review",
-      "Grammar and spelling check",
-      "Basic formatting review",
-      "General feedback",
-      "One round of revisions"
-    ],
-    popular: false,
-  },
-  {
     name: "Comprehensive Edit",
     price: 299,
     description: "48 hours turnaround",
     features: [
-      "Everything in Essential",
+      "Personal Statement Review",
       "CV/Resume review",
       "3 Experience descriptions",
       "Program-specific tailoring",
       "Two rounds of revisions",
       "Priority support"
     ],
-    popular: true,
+    popular: false,
   },
   {
     name: "Premium Package",
@@ -52,7 +39,7 @@ const packages = [
       "Direct reviewer communication",
       "Application strategy session"
     ],
-    popular: false,
+    popular: true,
   },
   {
     name: "Complete Package",
@@ -178,24 +165,24 @@ export default function Home() {
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-white"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 lg:py-32">
-          <div className="max-w-3xl">
+          <div className="max-w-3xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 bg-gray-100 text-gray-700 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium mb-6 sm:mb-8">
               <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4" />
               <span className="line-clamp-1">42% of applicants didn't match last year</span>
             </div>
-            
+
             <h1 className="text-3xl sm:text-5xl lg:text-7xl font-bold text-gray-900 mb-4 sm:mb-6 leading-[1.1] tracking-tight">
               Your application has
               <span className="block text-gray-400">7 seconds</span>
               <span className="block">to impress.</span>
             </h1>
-            
+
             <p className="text-base sm:text-lg lg:text-xl text-gray-600 mb-8 sm:mb-10 leading-relaxed">
-              Program directors spend seconds scanning each application. 
+              Program directors spend seconds scanning each application.
               One weak statement, one poorly written experience — that's all it takes.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-8 sm:mb-12">
+            <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mb-8 sm:mb-12">
               <Link href="#pricing" className="w-full sm:w-auto">
                 <Button size="lg" className="w-full sm:w-auto text-sm sm:text-base px-6 sm:px-8 py-4 sm:py-6 bg-gray-900 hover:bg-gray-800 text-white rounded-lg cursor-pointer">
                   Get Started
@@ -209,7 +196,7 @@ export default function Home() {
               </Link>
             </div>
 
-            <div className="flex flex-wrap items-center gap-4 sm:gap-8 text-xs sm:text-sm text-gray-600">
+            <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-8 text-xs sm:text-sm text-gray-600">
               {stats.slice(0, 3).map((stat, i) => (
                 <div key={i} className="flex items-center gap-1.5 sm:gap-2">
                   <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-gray-400 flex-shrink-0" />
@@ -339,7 +326,7 @@ export default function Home() {
             </p>
           </div>
           
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-5xl mx-auto">
             {packages.map((pkg, index) => (
               <div 
                 key={index} 
