@@ -28,6 +28,7 @@ export default function BlogGeneratePage() {
   const [wordCountTarget, setWordCountTarget] = useState(2000)
   const [includeFaq, setIncludeFaq] = useState(true)
   const [autoPublish, setAutoPublish] = useState(true)
+  const [enhanceContent, setEnhanceContent] = useState(true)
 
   const [generating, setGenerating] = useState(false)
   const [suggesting, setSuggesting] = useState(false)
@@ -97,6 +98,7 @@ export default function BlogGeneratePage() {
           wordCountTarget,
           includeFaq,
           autoPublish,
+          enhanceContent,
         }),
       })
 
@@ -268,6 +270,18 @@ export default function BlogGeneratePage() {
           </div>
 
           <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                id="enhanceContent"
+                checked={enhanceContent}
+                onChange={(e) => setEnhanceContent(e.target.checked)}
+                className="h-4 w-4 rounded border-gray-600 bg-gray-700 text-blue-500 focus:ring-blue-500"
+              />
+              <label htmlFor="enhanceContent" className="text-sm text-gray-300">
+                Two-pass enhancement (generates longer, more detailed content)
+              </label>
+            </div>
             <div className="flex items-center gap-3">
               <input
                 type="checkbox"

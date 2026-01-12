@@ -1,196 +1,81 @@
-import Anthropic from '@anthropic-ai/sdk';
 import { prisma } from './prisma';
 import slugify from 'slugify';
 import { getUniqueRandomTopic, getTopicForTimeOfDay } from './blog-topics';
+import { generateEnhancedBlogPost } from './blog-enhancer';
 
-const getAnthropicClient = () => {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    throw new Error('ANTHROPIC_API_KEY is not set in environment variables');
-  }
-  return new Anthropic({
-    apiKey: apiKey,
-  });
-};
+function generateTags(topic: string, category: string, relatedKeywords: string[] = []): string[] {
+  const baseTags = ['ERAS', 'residency', 'medical students', 'match 2025'];
 
-// SEO tracking
-let lastPublishedHour = new Date().getHours();
+  // Add category-specific tags
+  const categoryTags: { [key: string]: string[] } = {
+    APPLICATION_TIPS: ['application tips', 'ERAS tips', 'application strategy'],
+    PERSONAL_STATEMENT: ['personal statement', 'PS writing', 'residency essay'],
+    INTERVIEW_PREP: ['interview tips', 'residency interview', 'MMI prep'],
+    SPECIALTY_GUIDES: ['specialty selection', 'medical specialties', 'career path'],
+    TIMELINE_PLANNING: ['application timeline', 'ERAS deadlines', 'match calendar'],
+    PROGRAM_SELECTION: ['program research', 'residency programs', 'where to apply'],
+    MATCH_STRATEGY: ['match strategy', 'rank list', 'NRMP match'],
+    SUCCESS_STORIES: ['match success', 'residency journey', 'applicant stories'],
+  };
+
+  const tags = [
+    ...baseTags,
+    ...categoryTags[category] || [],
+    ...relatedKeywords.slice(0, 4),
+    topic.split(' ').slice(0, 2).join(' ').toLowerCase(),
+  ];
+
+  return [...new Set(tags)].slice(0, 12);
+}
 
 export async function generateBlogPost() {
   try {
-    // Get Anthropic client
-    const anthropic = getAnthropicClient();
-    
     // Select topic based on time of day for better engagement
     const currentHour = new Date().getHours();
     const topicData = getTopicForTimeOfDay(currentHour) || getUniqueRandomTopic();
-    
+
     if (!topicData) {
       throw new Error('No available topics to generate blog post');
     }
-    
+
     const { topic, category: categoryName, icon } = topicData;
-    
-    // Generate content using Anthropic API
-    const response = await anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
-      max_tokens: 4000,
-      temperature: 0.7,
-      messages: [
-        {
-          role: 'user',
-          content: `You are an expert medical educator and residency application advisor with deep knowledge of SEO and content marketing. Write a comprehensive, SEO-optimized blog post about: "${topic}"
 
-The blog post should be targeted at medical students applying for residency through ERAS.
-
-IMPORTANT SEO REQUIREMENTS:
-- Include the main keyword "${topic}" in the first paragraph
-- Use related keywords naturally throughout the content
-- Include long-tail keyword variations
-- Optimize for featured snippets with clear, concise answers
-- Include current year (2025) where relevant
-- Target specific search intents
-
-IMPORTANT: Return ONLY a valid JSON object (not markdown code blocks) with this exact structure:
-{
-  "content": "HTML content of the main article (2000-2500 words)",
-  "metaDescription": "A 150-160 character SEO description including the main keyword",
-  "faqSection": [
-    {
-      "question": "Frequently asked question",
-      "answer": "Detailed answer"
-    }
-  ],
-  "relatedKeywords": ["keyword1", "keyword2", "keyword3"],
-  "internalLinks": [
-    {
-      "text": "anchor text",
-      "url": "/blog/suggested-related-article-slug"
-    }
-  ]
-}
-
-Do not include any text before or after the JSON object. The response should start with { and end with }
-
-For the main content:
-1. Start with an engaging introduction (2-3 paragraphs) that includes the main keyword
-2. Include 5-7 main sections with clear, keyword-rich subheadings
-3. Use bullet points and numbered lists for better readability and featured snippets
-4. Include specific, actionable advice with current statistics and data
-5. Add a "Quick Answer" section near the beginning for featured snippet optimization
-6. Include tables or comparison charts where relevant
-7. End with a conclusion that summarizes key points and includes a call-to-action
-
-Write the content in HTML format with proper tags:
-- Use <h2> for main section headings
-- Use <h3> for subsection headings
-- Use <p> for paragraphs
-- Use <ul> and <li> for bullet points
-- Use <ol> and <li> for numbered lists
-- Use <strong> for emphasis
-- Use <blockquote> for important quotes or tips
-
-Include 5-8 relevant FAQs that address common "People Also Ask" questions about the topic.
-Include 3-5 related keywords that the article targets.
-Suggest 2-3 internal links to related articles.
-
-Make the content informative, practical, and engaging. Include specific examples and real scenarios that medical students face during the residency application process.`
-        }
-      ]
-    });
-    
-    const responseText = response.content[0].type === 'text' ? response.content[0].text : '';
-    
-    // Debug: Log first 200 chars of response
-    console.log('AI Response preview:', responseText.substring(0, 200));
-    
-    let blogData;
-    let content = '';
-    let metaDescription = null;
-    let faqSection = [];
-    let relatedKeywords: string[] = [];
-    let internalLinks: any[] = [];
-    
-    try {
-      // Parse the JSON response
-      blogData = JSON.parse(responseText);
-      
-      // Extract content properly
-      if (typeof blogData.content === 'string') {
-        content = blogData.content;
-        
-        // Make sure content is HTML, not nested JSON
-        if (content.trim().startsWith('{')) {
-          try {
-            const nestedData = JSON.parse(content);
-            content = nestedData.content || content;
-          } catch (e) {
-            // If parsing fails, assume it's HTML that starts with {
-          }
-        }
-      } else {
-        content = String(blogData.content || '');
-      }
-      
-      // Extract metadata
-      metaDescription = blogData.metaDescription || null;
-      faqSection = Array.isArray(blogData.faqSection) ? blogData.faqSection : [];
-      relatedKeywords = Array.isArray(blogData.relatedKeywords) ? blogData.relatedKeywords : [];
-      internalLinks = Array.isArray(blogData.internalLinks) ? blogData.internalLinks : [];
-      
-      // Validate content is HTML
-      if (!content.includes('<') || !content.includes('>')) {
-        console.warn('Content does not appear to be HTML, wrapping in paragraph tags');
-        content = `<p>${content}</p>`;
-      }
-      
-      // Clean up the content - ensure no JSON structure remains
-      content = content.trim();
-      
-    } catch (e) {
-      console.error('Failed to parse AI response as JSON:', e);
-      // Fallback if response is not JSON - assume it's raw HTML content
-      if (responseText.includes('<') && responseText.includes('>')) {
-        content = responseText;
-      } else {
-        content = `<p>${responseText}</p>`;
-      }
-    }
-    
-    // Final validation - ensure we have actual HTML content
-    if (!content || content.trim() === '') {
-      throw new Error('No valid content generated');
-    }
-    
-    // Generate excerpt from meta description or content
-    const plainText = metaDescription || content.replace(/<[^>]*>/g, '').substring(0, 200);
-    
-    // Calculate read time (assuming 200 words per minute)
-    const wordCount = content.split(' ').length;
-    const readTime = Math.ceil(wordCount / 200);
-    
-    // Generate comprehensive tags for SEO
-    const tags = generateTags(topic, categoryName, relatedKeywords);
-    
-    // Create slug
-    const slug = slugify(topic, { lower: true, strict: true });
-    
     // Check if post with this slug already exists
+    const slug = slugify(topic, { lower: true, strict: true });
     const existingPost = await prisma.blogPost.findUnique({
       where: { slug }
     });
-    
+
     if (existingPost) {
       console.log(`Blog post with slug "${slug}" already exists. Skipping...`);
       return null;
     }
-    
+
+    console.log(`Generating enhanced blog post: "${topic}"`);
+
+    // Use two-pass enhanced generation
+    const blogData = await generateEnhancedBlogPost(
+      topic,
+      categoryName,
+      [], // No specific keywords for auto-generation
+      2000, // Target word count
+      true // Include FAQ
+    );
+
+    if (!blogData.content || blogData.content.trim() === '') {
+      throw new Error('No valid content generated');
+    }
+
+    // Generate excerpt from meta description or content
+    const plainText = blogData.metaDescription || blogData.content.replace(/<[^>]*>/g, '').substring(0, 200);
+    const tags = generateTags(topic, categoryName, blogData.relatedKeywords);
+
     // Create schema markup
     const schemaMarkup = JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'BlogPosting',
       headline: topic,
-      description: metaDescription || plainText,
+      description: blogData.metaDescription || plainText,
       author: {
         '@type': 'Person',
         name: 'MyERAS Reviewer Team',
@@ -198,127 +83,62 @@ Make the content informative, practical, and engaging. Include specific examples
       datePublished: new Date().toISOString(),
       publisher: {
         '@type': 'Organization',
-        name: 'MyERAS Reviewer',
+        name: 'MyERAS Editing',
+        url: 'https://www.myerasediting.com'
       },
     });
-    
-    // Save to database
+
+    // Save to database with auto-publish
     const blogPost = await prisma.blogPost.create({
       data: {
         title: topic,
         slug,
         excerpt: plainText + (plainText.length === 200 ? '...' : ''),
-        content,
+        content: blogData.content,
         category: categoryName as any,
         tags: tags.join(', '),
         icon: icon,
-        readTime,
-        featured: Math.random() > 0.8, // 20% chance of being featured
+        readTime: blogData.readTime,
+        featured: Math.random() < 0.2, // 20% chance of being featured
         author: 'MyERAS Reviewer Team',
-        metaDescription,
-        faqSection: faqSection.length > 0 ? faqSection : undefined,
+        metaDescription: blogData.metaDescription,
+        faqSection: blogData.faqSection.length > 0 ? blogData.faqSection : undefined,
         schemaMarkup,
+        publishedAt: new Date(), // Auto-publish
       },
     });
-    
-    console.log(`Successfully generated blog post: ${topic}`);
-    
-    // Trigger SEO automation pipeline
-    if (process.env.NODE_ENV === 'production') {
-      try {
-        await triggerSEOPipeline(blogPost);
-      } catch (error) {
-        console.error('SEO pipeline error:', error);
-        // Don't fail the blog generation if SEO pipeline fails
-      }
-    }
-    
+
+    console.log(`Successfully generated enhanced blog post: ${topic} (${blogData.readTime} min read)`);
+
     return blogPost;
-    
+
   } catch (error) {
     console.error('Error generating blog post:', error);
     throw error;
   }
 }
 
-function generateTags(topic: string, category: string, relatedKeywords: string[] = []): string[] {
-  const baseTags = ['ERAS', 'residency', 'medical students', 'match'];
-  
-  // Add category-specific tags
-  const categoryTags: { [key: string]: string[] } = {
-    APPLICATION_TIPS: ['application tips', 'ERAS tips', 'application strategy'],
-    PERSONAL_STATEMENT: ['personal statement', 'essay writing', 'storytelling'],
-    INTERVIEW_PREP: ['interview', 'interview preparation', 'virtual interview'],
-    SPECIALTY_GUIDES: ['specialty selection', 'medical specialties', 'career choice'],
-    TIMELINE_PLANNING: ['timeline', 'deadlines', 'planning'],
-    PROGRAM_SELECTION: ['program selection', 'program list', 'application strategy'],
-    MATCH_STRATEGY: ['match algorithm', 'NRMP', 'rank list'],
-    SUCCESS_STORIES: ['success story', 'inspiration', 'match success'],
-  };
-  
-  const tags = [...baseTags];
-  
-  if (categoryTags[category]) {
-    tags.push(...categoryTags[category]);
-  }
-  
-  // Add topic-specific keywords
-  const topicWords = topic.toLowerCase().split(' ')
-    .filter(word => word.length > 4 && !['from', 'into', 'your', 'that', 'with'].includes(word));
-  tags.push(...topicWords.slice(0, 3));
-  
-  // Add related keywords
-  tags.push(...relatedKeywords);
-  
-  // Return unique tags
-  return [...new Set(tags)].slice(0, 12);
-}
-
-// Generate multiple blog posts
 export async function generateMultipleBlogPosts(count: number = 5) {
   const results = [];
-  
+
   for (let i = 0; i < count; i++) {
     try {
+      console.log(`Generating blog post ${i + 1} of ${count}...`);
       const post = await generateBlogPost();
       if (post) {
         results.push(post);
       }
-      // Add delay to avoid rate limiting
-      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      // Delay between posts to avoid rate limiting
+      if (i < count - 1) {
+        console.log('Waiting 10 seconds before next post...');
+        await new Promise(resolve => setTimeout(resolve, 10000));
+      }
     } catch (error) {
-      console.error(`Error generating blog post ${i + 1}:`, error);
+      console.error(`Failed to generate post ${i + 1}:`, error);
     }
   }
-  
+
+  console.log(`Generated ${results.length} of ${count} blog posts`);
   return results;
-}
-
-// Trigger SEO automation pipeline
-async function triggerSEOPipeline(blogPost: any) {
-  try {
-    // Call the SEO automation endpoint
-    const response = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/cron/seo-automation`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.CRON_SECRET}`,
-      },
-      body: JSON.stringify({
-        blogPostId: blogPost.id,
-        slug: blogPost.slug,
-        title: blogPost.title,
-        url: `${process.env.NEXT_PUBLIC_URL}/blog/${blogPost.slug}`,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`SEO automation failed: ${response.statusText}`);
-    }
-
-    console.log(`SEO pipeline triggered for: ${blogPost.title}`);
-  } catch (error) {
-    console.error('Error triggering SEO pipeline:', error);
-    throw error;
-  }
 }
