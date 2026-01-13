@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateBlogPost } from "@/lib/blog-generator";
 import { headers } from "next/headers";
+import { revalidatePath } from "next/cache";
 
 // This route will be called by Vercel Cron or external cron service
 export async function GET(request: NextRequest) {
@@ -20,6 +21,11 @@ export async function GET(request: NextRequest) {
     
     if (post) {
       console.log(`Cron job: Successfully generated blog post - ${post.title}`);
+
+      // Revalidate blog pages to show new content
+      revalidatePath('/blog');
+      revalidatePath(`/blog/${post.slug}`);
+
       return NextResponse.json({
         success: true,
         message: `Generated blog post: ${post.title}`,

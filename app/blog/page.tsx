@@ -4,6 +4,9 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import BlogClient from "./BlogClient";
 
+// Revalidate every 60 seconds to show new posts quickly
+export const revalidate = 60;
+
 export const metadata: Metadata = {
   title: 'ERAS Application Blog | Residency Tips & Strategies | MyERAS Editing',
   description: 'Expert ERAS application insights, personal statement tips, interview prep strategies, and residency match guidance. Stay updated with the latest application strategies.',
