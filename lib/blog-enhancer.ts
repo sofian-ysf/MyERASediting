@@ -1,30 +1,34 @@
-import Anthropic from '@anthropic-ai/sdk'
+import OpenAI from 'openai'
 
-const getAnthropicClient = () => {
-  const apiKey = process.env.ANTHROPIC_API_KEY
+const getOpenAIClient = () => {
+  const apiKey = process.env.OPENAI_API_KEY
   if (!apiKey) {
-    throw new Error('ANTHROPIC_API_KEY is not set')
+    throw new Error('OPENAI_API_KEY is not set')
   }
-  return new Anthropic({ apiKey })
+  return new OpenAI({ apiKey })
 }
 
-// Enhance a single blog section using Claude 3.5 Haiku (fast & cost-effective)
+// Enhance a single blog section using GPT-4o-mini (fast & cost-effective)
 export async function enhanceBlogSection(
   sectionContent: string,
   sectionTitle: string,
   topic: string,
   targetKeywords: string[]
 ): Promise<string> {
-  const anthropic = getAnthropicClient()
+  const openai = getOpenAIClient()
 
-  const response = await anthropic.messages.create({
-    model: 'claude-3-5-haiku-20241022',
+  const response = await openai.chat.completions.create({
+    model: 'gpt-4o-mini',
     max_tokens: 2500,
     temperature: 0.7,
     messages: [
       {
+        role: 'system',
+        content: 'You are an expert content enhancer for medical residency application articles. Your task is to expand and enrich content sections while maintaining accuracy and SEO optimization.'
+      },
+      {
         role: 'user',
-        content: `You are an expert content enhancer for medical residency application articles. Your task is to expand and enrich this content section while maintaining accuracy and SEO optimization.
+        content: `Enhance this content section for a medical residency application blog post.
 
 Guidelines:
 - Add more detailed explanations, examples, and practical tips
@@ -55,8 +59,8 @@ Return ONLY the enhanced HTML content for this section (including the heading ta
     ]
   })
 
-  const result = response.content[0]
-  return result.type === 'text' ? result.text : sectionContent
+  const result = response.choices[0]?.message?.content
+  return result || sectionContent
 }
 
 // Enhance entire blog content by processing each major section
@@ -105,7 +109,7 @@ export async function enhanceBlogContent(
   return enhancedSections.join('\n\n')
 }
 
-// Generate initial blog structure (First Pass)
+// Generate initial blog structure (First Pass) using GPT-4o
 export async function generateInitialBlogPost(
   topic: string,
   category: string,
@@ -118,7 +122,7 @@ export async function generateInitialBlogPost(
   faqSection: { question: string; answer: string }[]
   relatedKeywords: string[]
 }> {
-  const anthropic = getAnthropicClient()
+  const openai = getOpenAIClient()
 
   const keywordsPrompt = targetKeywords.length > 0
     ? `Target these keywords naturally: ${targetKeywords.join(', ')}`
@@ -128,14 +132,19 @@ export async function generateInitialBlogPost(
     ? 'Include 5-8 relevant FAQs that address common "People Also Ask" questions about the topic.'
     : ''
 
-  const response = await anthropic.messages.create({
-    model: 'claude-3-5-sonnet-20241022',
+  const response = await openai.chat.completions.create({
+    model: 'gpt-4o',
     max_tokens: 6000,
     temperature: 0.7,
+    response_format: { type: 'json_object' },
     messages: [
       {
+        role: 'system',
+        content: 'You are an expert medical educator and residency application advisor with deep knowledge of SEO and content marketing. You always respond with valid JSON.'
+      },
+      {
         role: 'user',
-        content: `You are an expert medical educator and residency application advisor with deep knowledge of SEO and content marketing. Write a comprehensive, SEO-optimized blog post about: "${topic}"
+        content: `Write a comprehensive, SEO-optimized blog post about: "${topic}"
 
 The blog post should be targeted at medical students applying for residency through ERAS.
 Category: ${category.replace(/_/g, ' ')}
@@ -150,7 +159,7 @@ ${keywordsPrompt}
 - Include current year (2025) where relevant
 - Target specific search intents
 
-IMPORTANT: Return ONLY a valid JSON object (not markdown code blocks) with this exact structure:
+Return a JSON object with this exact structure:
 {
   "content": "HTML content of the main article with proper h2, h3, p, ul, li, strong tags",
   "metaDescription": "A 150-160 character SEO description including the main keyword",
@@ -162,8 +171,6 @@ IMPORTANT: Return ONLY a valid JSON object (not markdown code blocks) with this 
   ],` : ''}
   "relatedKeywords": ["keyword1", "keyword2", "keyword3"]
 }
-
-Do not include any text before or after the JSON object. The response should start with { and end with }
 
 For the main content:
 1. Start with an engaging introduction (2-3 paragraphs) that includes the main keyword
@@ -181,7 +188,7 @@ Make the content informative, practical, and engaging. Include specific examples
     ]
   })
 
-  const responseText = response.content[0].type === 'text' ? response.content[0].text : ''
+  const responseText = response.choices[0]?.message?.content || ''
 
   try {
     const blogData = JSON.parse(responseText)
@@ -220,9 +227,9 @@ export async function generateEnhancedBlogPost(
   relatedKeywords: string[]
   readTime: number
 }> {
-  console.log('Pass 1: Generating initial blog structure...')
+  console.log('Pass 1: Generating initial blog structure with GPT-4o...')
 
-  // First Pass: Generate initial structure with Claude Sonnet
+  // First Pass: Generate initial structure with GPT-4o
   const initialPost = await generateInitialBlogPost(
     topic,
     category,
@@ -231,9 +238,9 @@ export async function generateEnhancedBlogPost(
     includeFaq
   )
 
-  console.log('Pass 2: Enhancing content sections...')
+  console.log('Pass 2: Enhancing content sections with GPT-4o-mini...')
 
-  // Second Pass: Enhance each section with Claude Haiku
+  // Second Pass: Enhance each section with GPT-4o-mini
   let enhancedContent = initialPost.content
 
   try {
