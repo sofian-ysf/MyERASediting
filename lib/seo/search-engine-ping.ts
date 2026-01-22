@@ -24,7 +24,7 @@ export async function pingSearchEngines() {
       body: {
         host: new URL(process.env.NEXT_PUBLIC_URL || 'https://www.myerasediting.com').hostname,
         key: process.env.INDEXNOW_KEY || 'default-key',
-        keyLocation: `${process.env.NEXT_PUBLIC_URL}/indexnow-key.txt`,
+        keyLocation: `${process.env.NEXT_PUBLIC_URL}/${process.env.INDEXNOW_KEY}.txt`,
         urlList: [sitemapUrl],
       },
     },
@@ -120,7 +120,7 @@ export async function submitUrlToSearchEngines(url: string) {
         body: JSON.stringify({
           host: new URL(process.env.NEXT_PUBLIC_URL || 'https://www.myerasediting.com').hostname,
           key: process.env.INDEXNOW_KEY,
-          keyLocation: `${process.env.NEXT_PUBLIC_URL}/indexnow-key.txt`,
+          keyLocation: `${process.env.NEXT_PUBLIC_URL}/${process.env.INDEXNOW_KEY}.txt`,
           urlList: [url],
         }),
       });

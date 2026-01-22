@@ -29,7 +29,7 @@
   font-size: 48px;
   line-height: 1.2;
   margin: 0 0 16px 0;
-  transform: scaleX(1.1);
+  transform: scaleY(0.9);
 }
 
 .blog-header p {
@@ -86,7 +86,7 @@
   font-size: 28px;
   line-height: 1.2;
   margin: 0 0 12px 0;
-  transform: scaleX(1.1);
+  transform: scaleY(0.9);
   transform-origin: left;
 }
 
@@ -218,7 +218,7 @@
   font-size: 18px;
   line-height: 1.3;
   margin: 0;
-  transform: scaleX(1.1);
+  transform: scaleY(0.9);
   transform-origin: left;
 }
 
@@ -252,7 +252,7 @@
   color: #1a1a1a;
   font-size: 28px;
   margin: 0 0 12px 0;
-  transform: scaleX(1.1);
+  transform: scaleY(0.9);
   transform-origin: center;
 }
 

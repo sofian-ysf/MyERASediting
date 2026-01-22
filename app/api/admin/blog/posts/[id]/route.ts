@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { pingSearchEngines, submitUrlToSearchEngines } from '@/lib/seo/search-engine-ping'
 
 export async function GET(
   request: NextRequest,
@@ -61,6 +62,16 @@ export async function PATCH(
     const { id } = await params
     const body = await request.json()
 
+    // Check if post is being published (publishedAt changing from null to a date)
+    const existingPost = await prisma.blogPost.findUnique({
+      where: { id },
+      select: { publishedAt: true, slug: true }
+    })
+
+    const isBeingPublished = existingPost &&
+      !existingPost.publishedAt &&
+      body.publishedAt
+
     const updateData: any = {}
 
     if (body.title !== undefined) updateData.title = body.title
@@ -80,6 +91,16 @@ export async function PATCH(
       where: { id },
       data: updateData
     })
+
+    // Ping search engines if post was just published
+    if (isBeingPublished) {
+      const blogUrl = `${process.env.NEXT_PUBLIC_URL || 'https://www.myerasediting.com'}/blog/${post.slug}`
+      console.log(`[SEO] Blog post published, pinging search engines: ${blogUrl}`)
+
+      // Non-blocking - don't wait for results
+      pingSearchEngines().catch(err => console.error('Search engine ping failed:', err))
+      submitUrlToSearchEngines(blogUrl).catch(err => console.error('URL submission failed:', err))
+    }
 
     return NextResponse.json({ post })
   } catch (error) {

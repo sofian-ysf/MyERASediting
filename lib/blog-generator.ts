@@ -2,6 +2,7 @@ import { prisma } from './prisma';
 import slugify from 'slugify';
 import { getUniqueRandomTopic, getTopicForTimeOfDay } from './blog-topics';
 import { generateEnhancedBlogPost } from './blog-enhancer';
+import { pingSearchEngines, submitUrlToSearchEngines } from './seo/search-engine-ping';
 
 function generateTags(topic: string, category: string, relatedKeywords: string[] = []): string[] {
   const baseTags = ['ERAS', 'residency', 'medical students', 'match 2025'];
@@ -109,6 +110,11 @@ export async function generateBlogPost() {
     });
 
     console.log(`Successfully generated enhanced blog post: ${topic} (${blogData.readTime} min read)`);
+
+    // Ping search engines about new content (non-blocking)
+    const blogUrl = `${process.env.NEXT_PUBLIC_URL || 'https://www.myerasediting.com'}/blog/${slug}`;
+    pingSearchEngines().catch(err => console.error('Search engine ping failed:', err));
+    submitUrlToSearchEngines(blogUrl).catch(err => console.error('URL submission failed:', err));
 
     return blogPost;
 
